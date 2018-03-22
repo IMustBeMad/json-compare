@@ -90,6 +90,14 @@ public abstract class RandomUtils {
         );
     }
 
+    public static String getRandomCurrency() {
+        return getRandomFromList(List.of("USD", "EUR", "RUB", "GBP", "UAH", "PLN"));
+    }
+
+    public static Integer getRandomInt() {
+        return new Random().nextInt();
+    }
+
     private static String getRandomFromList(List<String> list) {
         return list.get(ThreadLocalRandom.current().nextInt(0, list.size()));
     }

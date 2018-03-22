@@ -2,7 +2,7 @@ package json.compare.common;
 
 import lombok.*;
 
-import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -12,5 +12,5 @@ import java.util.List;
 public class RateCardLane {
 
     private RateCardField fields;
-    private List<RateCardCost> costs;
+    private Map<String, String> costs;
 }

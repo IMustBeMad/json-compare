@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import json.compare.common.RateCardField;
-import json.compare.generator.source.RateCardFieldSource;
+import json.compare.common.RateCardLane;
+import json.compare.generator.source.RateCardLaneSource;
+import org.assertj.core.api.Assertions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -29,24 +32,35 @@ public class RandomFieldsTest {
 
     private static final int QUANTITY = 15000;
 
+//    @Autowired
+//    private RateCardFieldSource rateCardFieldSource;
+
     @Autowired
-    private RateCardFieldSource rateCardFieldSource;
+    private RateCardLaneSource rateCardLaneSource;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Test
     public void testParsingWithJackson() throws IOException {
-        List<RateCardField> parsedFields = new ArrayList<>();
+//        List<RateCardField> parsedFields = new ArrayList<>();
+        List<RateCardLane> rateCardLanes = new ArrayList<>();
         List<String> jsonList = getJsonList();
+
+//        String json = objectMapper.writeValueAsString(getLane());
+//        rateCardLanes.add(objectMapper.readValue(json, RateCardLane.class));
 
         long start = System.currentTimeMillis();
         for (String json : jsonList) {
-            parsedFields.add(objectMapper.readValue(json, RateCardField.class));
+            RateCardLane rateCardLane = objectMapper.readValue(json, RateCardLane.class);
+            String dangerousGoods = rateCardLane.getFields().getDangerousGoods();
+
+            Assertions.assertThat(List.of("Y", "N")).contains(dangerousGoods);
+            rateCardLanes.add(rateCardLane);
         }
         long timeElapsed = System.currentTimeMillis() - start;
 
-        System.out.println("Parsing " + QUANTITY + " fields json with Jackson took " + timeElapsed + " (ms)");
+        System.out.println("Parsing " + QUANTITY + " lanes json with Jackson took " + timeElapsed + " (ms)");
     }
 
     @Test
@@ -94,14 +108,49 @@ public class RandomFieldsTest {
         System.out.println("Parsing " + QUANTITY + " fields json with Jsonp took " + timeElapsed + " (ms)");
     }
 
+//    private List<String> getJsonList() throws JsonProcessingException {
+//        List<RateCardField> rateCardFields = rateCardFieldSource.generate(QUANTITY);
+//        List<String> jsonList = new ArrayList<>();
+//
+//        for (RateCardField rateCardField : rateCardFields) {
+//            jsonList.add(objectMapper.writeValueAsString(rateCardField));
+//        }
+//
+//        return jsonList;
+//    }
+
     private List<String> getJsonList() throws JsonProcessingException {
-        List<RateCardField> rateCardFields = rateCardFieldSource.generate(QUANTITY);
+        List<RateCardLane> rateCardFields = rateCardLaneSource.generate(QUANTITY);
         List<String> jsonList = new ArrayList<>();
 
-        for (RateCardField rateCardField : rateCardFields) {
-            jsonList.add(objectMapper.writeValueAsString(rateCardField));
+        for (RateCardLane rateCardLane : rateCardFields) {
+            jsonList.add(objectMapper.writeValueAsString(rateCardLane));
         }
 
         return jsonList;
     }
+
+    @Test
+    public void quantityTest() {
+        IntStream.range(0, 10)
+                 .forEach(it -> {
+                     try {
+                         testParsingWithJackson();
+                     } catch (IOException e) {
+                         e.printStackTrace();
+                     }
+                 });
+    }
+
+//    private RateCardLane getLane() {
+//        Map<String, String> costs = new HashMap<>();
+//        costs.put("74", "{\"CURRENCY\":\"USD\", \"MIN\":\"89\", \"MAX\":\"90\"}");
+//        costs.put("115", "{\"CURRENCY\":\"EUR\", \"MIN\":\"11\", \"MAX\":\"145\"}");
+//
+//        RateCardLane jsonWrapper = new RateCardLane();
+//        jsonWrapper.setFields(rateCardFieldSource.get());
+//        jsonWrapper.setCosts(costs);
+//
+//        return jsonWrapper;
+//    }
 }
