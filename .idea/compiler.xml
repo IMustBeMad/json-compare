@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="json-compare" target="1.5" />
+      <module name="json-compare" target="9" />
     </bytecodeTargetLevel>
   </component>
 </project>
